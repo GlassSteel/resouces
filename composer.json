@@ -1,0 +1,13 @@
+{
+    "name": "glasteel/resources",
+    "authors": [
+        {
+            "name": "Paul Glass-Steel",
+            "email": "glasteel@email.unc.edu"
+        }
+    ],
+    "autoload": {
+        "classmap": ["/"]
+    },
+	"require": {}
+}
