@@ -7,7 +7,12 @@
         }
     ],
     "autoload": {
-        "classmap": ["/"]
+        "classmap": [
+            "src/"
+        ],
+        "files": [
+            "init/dependencies.php"
+        ]
     },
 	"require": {}
 }
