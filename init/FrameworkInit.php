@@ -138,7 +138,7 @@ class FrameworkInit
 
 		//Set up authorized user, if one exists, via PID from AuthUserFromSSO and User from RedBeanPHP
 		//Add is_auth flag and auth_user object to Twig (renderer) vars
-		$app->add(function ($request, $response, $next){
+		$slim->add(function ($request, $response, $next){
 		    //$response->write('do auth</br >');
 		    $this->renderer->offsetSet('is_auth',false);
 		    $pid = $this->auth->getPID();
@@ -158,18 +158,18 @@ class FrameworkInit
 		});
 
 		//inject db into models
-		$app->add(function ($request, $response, $next){
+		$slim->add(function ($request, $response, $next){
 		    ModelBase::setDB($this->db);
 		    $response = $next($request, $response);
 		    return $response;
 		});
 
 		//TODO replace with single "non-200" class
-		$app->add( $app->getContainer()['catch404'] );
-		$app->add( $app->getContainer()['catch403'] );
+		$slim->add( $container['catch404'] );
+		$slim->add( $container['catch403'] );
 
 		//Disconnect DB
-		$app->add(function ($request, $response, $next){
+		$slim->add(function ($request, $response, $next){
 		    $response = $next($request, $response);
 			$this->db->close();
 		    return $response;
