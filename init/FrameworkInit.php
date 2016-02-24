@@ -159,7 +159,7 @@ class FrameworkInit
 
 		//inject db into models
 		$slim->add(function ($request, $response, $next){
-		    ModelBase::setDB($this->db);
+		    ResourceModelInterfaceTrait::setDB($this->db);
 		    $response = $next($request, $response);
 		    return $response;
 		});

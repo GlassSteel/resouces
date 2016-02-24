@@ -1,8 +1,9 @@
 <?php
 namespace glasteel;
 
-class User extends ModelBase
+class User implements ResourceModelInterface //extends ModelBase
 {
+	use ResourceModelInterfaceTrait;
 	use RollsCapsTrait;
 
 	protected $primary_bean_table = 'user';
