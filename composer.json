@@ -18,7 +18,7 @@
         "slim/twig-view": "^2.0",
         "slim/flash": "^0.1.0",
         "gabordemooij/redbean": "dev-master",
-        "glasteel/pre_r": "@dev",
+        "glasteel/pre_r": "dev-master",
         "glasteel/authuserfromsso": "dev-master",
         "glasteel/redbeanwrapper": "dev-master"
     },
