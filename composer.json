@@ -17,7 +17,6 @@
         "vlucas/phpdotenv": "^2.1",
         "slim/twig-view": "^2.0",
         "slim/flash": "^0.1.0",
-        "gabordemooij/redbean": "dev-master",
         "glasteel/pre_r": "dev-master",
         "glasteel/authuserfromsso": "dev-master",
         "glasteel/redbeanwrapper": "dev-master"
@@ -26,10 +25,6 @@
         "glasteel/pre_r": {
             "type": "vcs",
             "url": "https://github.com/GlassSteel/pre_r"
-        },
-        "glasteel/resources": {
-            "type": "vcs",
-            "url": "https://github.com/GlassSteel/resources"
         },
         "glasteel/authuserfromsso": {
             "type": "vcs",
