@@ -12,5 +12,7 @@
             "init/"
         ]
     },
-	"require": {}
+	"require": {
+        "vlucas/phpdotenv": "^2.1"
+    }
 }
