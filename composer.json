@@ -8,9 +8,13 @@
     ],
     "autoload": {
         "classmap": [
-            "resources/",
+            "controllers/",
+            "handlers/",
+            "http/",
             "init/",
-            "http/"
+            "middleware/",
+            "models/",
+            "resources/"
         ]
     },
     "minimum-stability": "dev",

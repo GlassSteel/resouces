@@ -54,7 +54,7 @@ class FrameworkInit
 			return json_decode($input, true);
 		});
 
-		// Set up dependencies
+		// SET UP DEPENDENCIES
 
 		//Replace Slim's response object with our extension, to serve the JSON API media type
 		$container['response'] = function($c){
@@ -95,11 +95,85 @@ class FrameworkInit
 			return $db;
 		};
 
+		//JSON Api Wrapper
+		$container['jsonapi'] = function ($c) {
+			return new JSONApiController;
+		};
+
 		//SSO authenticated user
 		$container['auth'] = function ($c) {
 			$auth = new AuthUserFromSSO;
 			return $auth;
 		};
+
+		//ROUTE MIDDLEWARE CLASSES
+		$container['catch403'] = function ($c) {
+			return new catch403($c->get('forbiddenHandler'));
+		};
+		$container['catch404'] = function ($c) {
+		    return new catch404($c->get('notFoundHandler'));
+		};
+		$container['IdParamsAreInt'] = function ($c) {
+		    return new IdParamsAreInt;
+		};
+		$container['IdParamsExist'] = function ($c) {
+		    return new IdParamsExist($c->get('db'));
+		};
+		$container['IdParamsJSONAPI'] = function ($c) {
+		    return new IdParamsJSONAPI(
+		    	$c->get('db'),
+		    	$c->get('jsonapi')
+		    );
+		};
+
+		//Error Handlers
+		$container['forbiddenHandler'] = function ($c) {
+			return new Forbidden(
+		    	$c->get('flash'),
+		    	$c->get('settings')['displayErrorDetails']
+		    );
+		};
+
+		// APPLICATION MIDDLEWARE
+
+		//Set up authorized user, if one exists, via PID from AuthUserFromSSO and User from RedBeanPHP
+		//Add is_auth flag and auth_user object to Twig (renderer) vars
+		$app->add(function ($request, $response, $next){
+		    //$response->write('do auth</br >');
+		    $this->renderer->offsetSet('is_auth',false);
+		    $pid = $this->auth->getPID();
+		    if ( $pid ){
+		        $user = new User();
+		    	if ( $user->setUserByPID($pid) ){
+		            $this->auth->userGS($user);
+		    	    $this->renderer->offsetSet('is_auth',true);
+		            //TODO pare down 'auth_user' to most essential keys via User method replacing export()
+		            $this->renderer->offsetSet('auth_user', $this->auth->userGS()->export());
+		        }else{
+		            //TODO redirect to signup
+		        }
+		    }
+			$response = $next($request, $response);
+		    return $response;
+		});
+
+		//inject db into models
+		$app->add(function ($request, $response, $next){
+		    ModelBase::setDB($this->db);
+		    $response = $next($request, $response);
+		    return $response;
+		});
+
+		//TODO replace with single "non-200" class
+		$app->add( $app->getContainer()['catch404'] );
+		$app->add( $app->getContainer()['catch403'] );
+
+		//Disconnect DB
+		$app->add(function ($request, $response, $next){
+		    $response = $next($request, $response);
+			$this->db->close();
+		    return $response;
+		});
 
 		return $slim;
 
