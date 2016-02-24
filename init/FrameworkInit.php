@@ -29,8 +29,8 @@ class FrameworkInit
 		        'renderer' => [
 		            'debug' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? true : false,
 		            'strict_variables' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? true : false,
-		            'template_path' => $this->root_dir . '/../templates/',
-		            'cache' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? false : $this->root_dir . '/../cache/twig/',
+		            'template_path' => $this->root_dir . '/templates/',
+		            'cache' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? false : $this->root_dir . '/cache/twig/',
 		        ],
 
 		        // settings
@@ -67,17 +67,39 @@ class FrameworkInit
 			$settings = $c->get('settings')['renderer'];
 			$view = new \Slim\Views\Twig($settings['template_path'], $settings);
 
-			$view->addExtension(new Twig_Extension_Debug());
+			$view->addExtension(new \Twig_Extension_Debug());
 
 			// Instantiate and add Slim specific extension
-		    $view->addExtension(new Slim\Views\TwigExtension(
+		    $view->addExtension(new \Slim\Views\TwigExtension(
 		        $c['router'],
 		        $c['request']->getUri()
 		    ));
 
 		    return $view;
 		};
-		
+
+		//https://github.com/slimphp/Slim-Flash
+		$container['flash'] = function () {
+		    return new \Slim\Flash\Messages();
+		};
+
+		//RedBeanPHP ORM
+		$container['db'] = function ($c) {
+			$db = new RedBeanWrapper;
+			$db->setup(
+				'mysql:host=' . $c->environment['DB_HOST'] . ';dbname=' . $c->environment['DB_NAME'],
+				$c->environment['DB_USER'],
+				$c->environment['DB_PASS']
+			);
+			return $db;
+		};
+
+		//SSO authenticated user
+		$container['auth'] = function ($c) {
+			$auth = new AuthUserFromSSO;
+			return $auth;
+		};
+
 	}//setupApp()
 
 	protected function dotenv(){
