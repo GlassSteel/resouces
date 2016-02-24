@@ -61,7 +61,23 @@ class FrameworkInit
 			$response = new Response(200, $headers);
 			return $response->withProtocolVersion($c->get('settings')['httpVersion']);
 		};
-	
+		
+		// Twig view renderer
+		$container['renderer'] = function ($c) {
+			$settings = $c->get('settings')['renderer'];
+			$view = new \Slim\Views\Twig($settings['template_path'], $settings);
+
+			$view->addExtension(new Twig_Extension_Debug());
+
+			// Instantiate and add Slim specific extension
+		    $view->addExtension(new Slim\Views\TwigExtension(
+		        $c['router'],
+		        $c['request']->getUri()
+		    ));
+
+		    return $view;
+		};
+		
 	}//setupApp()
 
 	protected function dotenv(){
