@@ -13,6 +13,7 @@
             "http/"
         ]
     },
+    "minimum-stability": "dev",
 	"require": {
         "gabordemooij/redbean": "dev-master",
         "glasteel/authuserfromsso": "dev-master",
