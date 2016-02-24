@@ -8,10 +8,8 @@
     ],
     "autoload": {
         "classmap": [
-            "src/"
-        ],
-        "files": [
-            "init/dependencies.php"
+            "src/",
+            "init/"
         ]
     },
 	"require": {}
