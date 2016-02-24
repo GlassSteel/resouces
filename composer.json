@@ -8,8 +8,9 @@
     ],
     "autoload": {
         "classmap": [
-            "src/",
-            "init/"
+            "resources/",
+            "init/",
+            "http/"
         ]
     },
 	"require": {

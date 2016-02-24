@@ -4,4 +4,91 @@ namespace glasteel;
 class FrameworkInit
 {
 
+	protected $root_dir;
+
+	const JSONAPI_MEDIA_TYPE = 'application/vnd.api+json';
+
+	public function __construct($root_dir){
+		$this->root_dir = $root_dir;
+
+		if( !session_id() ) {
+		    @session_start();
+		}
+
+		// Load variables from .env
+		$this->dotenv();
+
+	}//__construct()
+
+	public function getInitialSettings(){
+		return [
+		    'settings' => [
+		        'displayErrorDetails' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? true : false,
+
+		        // Renderer settings
+		        'renderer' => [
+		            'debug' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? true : false,
+		            'strict_variables' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? true : false,
+		            'template_path' => $this->root_dir . '/../templates/',
+		            'cache' => ( isset($_ENV['MODE']) && $_ENV['MODE'] === 'local' ) ? false : $this->root_dir . '/../cache/twig/',
+		        ],
+
+		        // settings
+		        // 'logger' => [
+		        //     'name' => 'slim-app',
+		        //     'path' => $this->root_dir . '/../logs/app.log',
+		        // ],
+		    ],
+		];
+	}//getInitialSettings()
+
+	public function setupApp($app){
+		//TODO check that $app is a valid Slim instance
+
+		$container = $app->getContainer();
+
+		//register the JSON API media type
+		//see http://jsonapi.org/format/
+		$container->get('request')->registerMediaTypeParser(self::JSONAPI_MEDIA_TYPE, function ($input) {
+			return json_decode($input, true);
+		});
+
+		// Set up dependencies
+
+		//Replace Slim's response object with our extension, to serve the JSON API media type
+		$container['response'] = function($c){
+			$headers = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
+			$response = new Response(200, $headers);
+			return $response->withProtocolVersion($c->get('settings')['httpVersion']);
+		};
+	
+	}//setupApp()
+
+	protected function dotenv(){
+		//load environment configuration values from .env
+		//dotenv will throw exceptions on any values missing or invalid
+		//https://github.com/vlucas/phpdotenv
+		$dotenv = new \Dotenv\Dotenv($this->root_dir);
+		$dotenv->load();
+		
+		$dotenv->required([
+			'DB_HOST',
+		    'DB_NAME',
+		    'DB_USER',
+		    'DB_PASS'
+		])->notEmpty();
+		
+		$dotenv->required('MODE')->allowedValues([
+			'local',
+			'development',
+			'production',
+		]);
+
+		//if we are running local, spoof the PID value that would be returned from Single Sign-On
+		if ( $_ENV['MODE'] === 'local' ){
+			$dotenv->required('DEV_PID')->isInteger();
+			$_SERVER['pid'] = $_ENV['DEV_PID'];
+		}
+	}//dotenv()
+
 }//class FrameworkInit
