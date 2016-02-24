@@ -42,10 +42,11 @@ class FrameworkInit
 		];
 	}//getInitialSettings()
 
-	public function setupApp($app){
-		//TODO check that $app is a valid Slim instance
-
-		$container = $app->getContainer();
+	public function getSlim($settings=false){
+		//TODO $settings overrides
+		$settings = $this->getInitialSettings();
+		$slim = new \Slim\App($settings);
+		$container = $slim->getContainer();
 
 		//register the JSON API media type
 		//see http://jsonapi.org/format/
@@ -100,7 +101,9 @@ class FrameworkInit
 			return $auth;
 		};
 
-	}//setupApp()
+		return $slim;
+
+	}//getSlim()
 
 	protected function dotenv(){
 		//load environment configuration values from .env
