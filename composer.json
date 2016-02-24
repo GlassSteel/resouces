@@ -23,19 +23,5 @@
         "slim/slim": "^3.0",
         "slim/twig-view": "^2.0",
         "vlucas/phpdotenv": "^2.1"
-    },
-    "repositories": {
-        "glasteel/pre_r": {
-            "type": "vcs",
-            "url": "https://github.com/GlassSteel/pre_r"
-        },
-        "glasteel/authuserfromsso": {
-            "type": "vcs",
-            "url": "https://github.com/GlassSteel/AuthUserFromSSO"
-        },
-        "glasteel/redbeanwrapper": {
-            "type": "vcs",
-            "url": "https://github.com/GlassSteel/RedBeanWrapper"
-        }
     }
 }
