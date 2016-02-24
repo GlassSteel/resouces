@@ -38,6 +38,6 @@
         "glasteel/redbeanwrapper": {
             "type": "vcs",
             "url": "https://github.com/GlassSteel/RedBeanWrapper"
-        },
+        }
     }
 }
