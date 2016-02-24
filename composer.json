@@ -16,18 +16,6 @@
 	"require": {
         "vlucas/phpdotenv": "^2.1",
         "slim/twig-view": "^2.0",
-        "slim/flash": "^0.1.0",
-        "glasteel/authuserfromsso": "dev-master",
-        "glasteel/redbeanwrapper": "dev-master"
+        "slim/flash": "^0.1.0"
     },
-    "repositories": {
-        "glasteel/authuserfromsso": {
-            "type": "vcs",
-            "url": "https://github.com/GlassSteel/AuthUserFromSSO"
-        },
-        "glasteel/redbeanwrapper": {
-            "type": "vcs",
-            "url": "https://github.com/GlassSteel/RedBeanWrapper"
-        }
-    }
 }
