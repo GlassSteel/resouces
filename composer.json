@@ -17,5 +17,5 @@
         "vlucas/phpdotenv": "^2.1",
         "slim/twig-view": "^2.0",
         "slim/flash": "^0.1.0"
-    },
+    }
 }
