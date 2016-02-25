@@ -24,9 +24,9 @@ class ResourceRoutesBuilder
 	/**
 	 * DI Slim 3 instance from container
 	 */
-	public __construct(App $app){
+	public function __construct(\Slim\App $app){
 		$this->app = $app;
-		
+		$container = $this->app->getContainer();
 		//Overwrite default settings with settings from container, if any
 		$settings = $container->get('settings');
 		$settings = 
@@ -64,7 +64,7 @@ class ResourceRoutesBuilder
 
 		//model class must implement ResourceModelInterface else throw exception
 		$resource_model_implements = (class_exists($resource_model_class)) ? class_implements($resource_model_class) : [];
-		if ( !in_array(RESOURCE_MODEL_INTERFACE, $resource_model_implements) ){
+		if ( !in_array(self::RESOURCE_MODEL_INTERFACE, $resource_model_implements) ){
 			//TODO exception
 		}
 		$resource_slug = $resource_model_class::getResourceSlug();
@@ -84,10 +84,10 @@ class ResourceRoutesBuilder
 		Determination Priority
 			1) 	fully qualified class name as specified in $config['controller_class']
 			2) 	subclass of fully qualified class name as specified in $config['controller_class_base'],
-				of naming convention namespace\ . ucfirst($resource_class) . $config['controller_class_base'], if exists
+				of naming convention namespace\ . ucfirst($resource_model_class) . $config['controller_class_base'], if exists
 			3) 	fully qualified class name as specified in $config['controller_class_base'],
 				if subclass above does not exist
-			4)	subclass of __NAMESPACE__\ . ucfirst($resource_class) . $settings['controller_class_base'], if exists
+			4)	subclass of __NAMESPACE__\ . ucfirst($resource_model_class) . $settings['controller_class_base'], if exists
 			5)	subclass of __NAMESPACE__\ . $settings['controller_class_base'], if subclass above does not exist
 		Determined controller class must implement RESOURCE_CONTROLLER_INTERFACE
 		*/
@@ -102,7 +102,7 @@ class ResourceRoutesBuilder
 			$controller_class =
 				implode('\\', $controller_class_base_namesegments)
 				. '\\'
-				. ucfirst($resource_class)
+				. ucfirst($resource_model_class)
 				. $controller_class_base_root
 			;
 			if ( !class_exists($controller_class) ){
@@ -112,7 +112,7 @@ class ResourceRoutesBuilder
 
 		//controller class must implement ResourceControllerInterface else throw exception
 		$controller_implements = (class_exists($controller_class)) ? class_implements($controller_class) : [];
-		if ( !in_array(RESOURCE_CONTROLLER_INTERFACE, $controller_implements) ){
+		if ( !in_array(self::RESOURCE_CONTROLLER_INTERFACE, $controller_implements) ){
 			//TODO exception
 		}
 

@@ -1,18 +1,13 @@
 <?php
 namespace glasteel;
 
-class User implements ResourceModelInterface //extends ModelBase
+class User extends ModelBase
 {
-	use ResourceModelInterfaceTrait;
 	use RollsCapsTrait;
 
 	protected $primary_bean_table = 'user';
 	protected static $pbt = 'user';
 	
-	public function getFullName(){
-		return ucfirst( trim($this->first_name) ) . ' ' . ucfirst( trim($this->last_name) );
-	}//getFullName()
-
 	public function setUserByPID($pid){
 		$user_bean = $this->db->findOne(
 			'user',
@@ -29,7 +24,7 @@ class User implements ResourceModelInterface //extends ModelBase
 	}//getUserByPID()
 
 	public function getInstanceName(){
-		return ucfirst($this->first_name) . ' ' . ucfirst($this->last_name);
+		return ucfirst( trim($this->first_name) ) . ' ' . ucfirst( trim($this->last_name) );
 	}//getInstanceName()
 
 	public function getResourceAttributes(){}

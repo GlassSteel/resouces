@@ -134,24 +134,29 @@ class FrameworkInit
 		    );
 		};
 
+		//Route Utility
+		$container['ResourceRoutesBuilder'] = function ($c) use ($slim) {
+			return new ResourceRoutesBuilder($slim);
+		};
+
 		// APPLICATION MIDDLEWARE
 
 		//Set up authorized user, if one exists, via PID from AuthUserFromSSO and User from RedBeanPHP
 		//Add is_auth flag and auth_user object to Twig (renderer) vars
 		$slim->add(function ($request, $response, $next){
-		    //$response->write('do auth</br >');
+		    $response->write('do auth</br >');
 		    $this->renderer->offsetSet('is_auth',false);
 		    $pid = $this->auth->getPID();
 		    if ( $pid ){
 		        $user = new User();
-		    	if ( $user->setUserByPID($pid) ){
-		            $this->auth->userGS($user);
-		    	    $this->renderer->offsetSet('is_auth',true);
-		            //TODO pare down 'auth_user' to most essential keys via User method replacing export()
-		            $this->renderer->offsetSet('auth_user', $this->auth->userGS()->export());
-		        }else{
-		            //TODO redirect to signup
-		        }
+		    //     if ( $user->setUserByPID($pid) ){
+		    // 		$this->auth->userGS($user);
+				  //   $this->renderer->offsetSet('is_auth',true);
+		    //         //TODO pare down 'auth_user' to most essential keys via User method replacing export()
+		    //         $this->renderer->offsetSet('auth_user', $this->auth->userGS()->export());
+		    //     }else{
+		    //         //TODO redirect to signup
+		    //     }
 		    }
 			$response = $next($request, $response);
 		    return $response;
@@ -159,7 +164,8 @@ class FrameworkInit
 
 		//inject db into models
 		$slim->add(function ($request, $response, $next){
-		    ResourceModelInterfaceTrait::setDB($this->db);
+			$response->write('inject db</br >');
+		    ResourceModelInterfaceTrait::setDB($this->db,$response);
 		    $response = $next($request, $response);
 		    return $response;
 		});

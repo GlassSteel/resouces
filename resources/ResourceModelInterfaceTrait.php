@@ -3,26 +3,9 @@ namespace glasteel;
 
 trait ResourceModelInterfaceTrait
 {
-	use HasRedBeanAsActiveRecordTrait;
-	
 	/*
-	protected string $name
-	protected string $resource_slug
+	protected (string) $name
 	*/
-
-	protected static $DB = null;
-	
-	//DB FUNCTIONS
-
-	public static function hasDB(){
-		return (!is_null(self::$DB));
-	}//hasDB()
-
-	public static function setDB(RedBeanWrapper $db){
-		if ( !self::hasDB() ){
-			self::$DB = $db;
-		}
-	}//setDB()
 
 	//INSTANCE FUNCTIONS
 
@@ -33,7 +16,7 @@ trait ResourceModelInterfaceTrait
 	//CLASS META FUNCTIONS
 
 	public static function getResourceSlug(){
-		return $this->resource_slug;
+		return self::$pbt;
 	}//getResourceSlug()
 
 	public static function getResourceNicename(){
