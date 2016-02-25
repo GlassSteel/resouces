@@ -1,5 +1,5 @@
 <?php
-namespace glasteel
+namespace glasteel;
 
 abstract class ModelBase implements ResourceModelInterface
 {

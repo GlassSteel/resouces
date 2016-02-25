@@ -149,14 +149,14 @@ class FrameworkInit
 		    $pid = $this->auth->getPID();
 		    if ( $pid ){
 		        $user = new User();
-		    //     if ( $user->setUserByPID($pid) ){
-		    // 		$this->auth->userGS($user);
-				  //   $this->renderer->offsetSet('is_auth',true);
-		    //         //TODO pare down 'auth_user' to most essential keys via User method replacing export()
-		    //         $this->renderer->offsetSet('auth_user', $this->auth->userGS()->export());
-		    //     }else{
-		    //         //TODO redirect to signup
-		    //     }
+		        if ( $user->setUserByPID($pid) ){
+		    		$this->auth->userGS($user);
+				    $this->renderer->offsetSet('is_auth',true);
+		            //TODO pare down 'auth_user' to most essential keys via User method replacing export()
+		            $this->renderer->offsetSet('auth_user', $this->auth->userGS()->export());
+		        }else{
+		            //TODO redirect to signup
+		        }
 		    }
 			$response = $next($request, $response);
 		    return $response;
@@ -165,7 +165,7 @@ class FrameworkInit
 		//inject db into models
 		$slim->add(function ($request, $response, $next){
 			$response->write('inject db</br >');
-		    ResourceModelInterfaceTrait::setDB($this->db,$response);
+		    ModelBase::setDB($this->db,$response);
 		    $response = $next($request, $response);
 		    return $response;
 		});

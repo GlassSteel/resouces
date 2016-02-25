@@ -16,7 +16,8 @@ trait ResourceModelInterfaceTrait
 	//CLASS META FUNCTIONS
 
 	public static function getResourceSlug(){
-		return self::$pbt;
+		$called_class = get_called_class();
+		return $called_class::$pbt;
 	}//getResourceSlug()
 
 	public static function getResourceNicename(){
