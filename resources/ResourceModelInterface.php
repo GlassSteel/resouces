@@ -40,6 +40,12 @@ interface ResourceModelInterface
 	 */
 	public function getResourceAttributes();
 
+	
+	/**
+	 * 
+	 */
+	public static function getActiveCollection();
+
 
 	/**
 	 * Return a natural language identifer for the instance class,

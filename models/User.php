@@ -27,6 +27,14 @@ class User extends ModelBase
 		return ucfirst( trim($this->first_name) ) . ' ' . ucfirst( trim($this->last_name) );
 	}//getInstanceName()
 
+	public function getResourceRelationships(){
+		return [
+			'roles' => $this->getAllRoles(),
+		];
+	}//getResourceRelationships()
+
+
+
 	public function getResourceAttributes(){}
 	protected function validateOwnAttributes(){}
 	public function saveResourceAttributes($to_save){}

@@ -23,11 +23,14 @@ class IdParamsJSONAPI extends middlewareBase
 
         $db_tables = $this->db->inspect();
         foreach ( $this->filterAttrs($route_args) as $key => $value) {
+
             $param_table = str_ireplace('_id', '', $key);
             if ( !in_array($param_table, $db_tables) ){
                 continue;
             }
-            $resource = $this->jsonapi->getResource($param_table,$value);
+            $obj = $route->getArgument($param_table);
+            
+            $resource = $this->jsonapi->getResource(get_class($obj),$obj);
             $route->setArgument($param_table . '_jsonapi',$resource);
             $request = $request->withAttribute('route',$route);
         }

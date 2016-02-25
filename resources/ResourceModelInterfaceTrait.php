@@ -150,4 +150,14 @@ trait ResourceModelInterfaceTrait
 		return $called::getResourceNicename() . 's';
 	}//getResourcesNicename()
 
+	public static function getActiveCollection(){
+		$called = get_called_class();
+		$active = [];
+		$beans = $called::$DB->find($called::$pbt, 'active = 1 ORDER BY id ASC');
+		foreach ($beans as $idx => $bean) {
+			$active[] = new $called($bean);
+		}
+		return $active;
+	}//getActiveCollection()
+
 }//trait ResourceModelInterfaceTrait

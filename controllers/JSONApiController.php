@@ -3,27 +3,29 @@ namespace glasteel;
 
 class JSONApiController
 {
-	public function formatCollection($type,$ids){
+	// format resource collection
+	// @param $resources is instances of $resource_class or ids of same
+	public function formatCollection($resource_class,$resources){
 		$collection = [];
-		foreach ($ids as $idx => $id) {
-			$collection[] = $this->getResource($type,$id);
+		foreach ($resources as $idx => $resource) {
+			$collection[] = $this->getResource($resource_class,$resource);
 		}
 		return $collection;
 	}//getCollection()
 
-	//get single resource
+	// format single resource
 	// @param $resource is instanceof $resource_class or id of same
 	public function getResource($resource_class,$resource=null,$flat=false){
 		if ( !( $resource instanceof $resource_class ) ){
 			$resource = new $resource_class($resource);
 		}
 		$id = $resource->id;
-		$type = $resource_class::getResourceSlug();
+		$slug = $resource_class::getResourceSlug();
 		$relationships = ($id) ? $resource->getResourceRelationships() : false;
 		$included = ($id) ? $resource->getResourceIncluded() : false;
 		
 		$json = [
-			'type' => $type,
+			'type' => $slug,
 			'id' => ($id) ? $id : 0,
 			'attributes' => ($id) ? $resource->getResourceAttributes() : new \stdclass,
 			'meta' => [

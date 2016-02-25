@@ -76,12 +76,15 @@ trait ResourceControllerInterfaceTrait
 	//Access an API representation of a single resource instance, via GET
 	//e.g. /api/user/2 returns JSON representation of User with ID = 2
 	public function getSingleApi($request, $response, $args){
-		$response->write(__METHOD__ . '<br />');
-		foreach ($args as $key => $value) {
-			$response->write($key .' =<br />');
-			$response->write( print_r($value,true) );
+		$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
+		if ( $response->getStatusCode() != 200 ){
+			return $response; //TODO return json api error
 		}
-
+		$resource_model_class = $this->resource_model_class;
+		$resource_slug = $resource_model_class::getResourceSlug();
+		return $response->withJsonAPI(
+			$this->wrap_resource_for_get($args[$resource_slug . '_jsonapi'])
+		);
 	}//getSingleApi()
 
 	//Access a web representation of a single resource instance, via GET
@@ -98,13 +101,36 @@ trait ResourceControllerInterfaceTrait
 	//Access an API representation of a collection of resources, via GET
 	//e.g. /api/users returns JSON representation of all Users
 	public function getCollectionApi($request, $response, $args){
-		$response->write(__METHOD__ . '<br />');
-		foreach ($args as $key => $value) {
-			$response->write($key .' =<br />');
-			$response->write( print_r($value,true) );
+		$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
+		if ( $response->getStatusCode() != 200 ){
+			return $response; //TODO return json api error
 		}
-
+		$resource_model_class = $this->resource_model_class;
+		return $response->withJsonAPI(
+			$this->jsonapi_controller->formatCollection(
+				$resource_model_class, $resource_model_class::getActiveCollection()
+			)
+		);
 	}//getCollectionApi()
+
+
+
+	// public function index($request, $response, $args){
+	// 	$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
+	// 	if ( $response->getStatusCode() != 200 ){
+	// 		return $response; //TEMP
+	// 	}
+
+	// 	$modelclass = __NAMESPACE__ . '\\' . ucfirst($this->resource_type);
+
+	// 	return $response->withJsonAPI(
+	// 		$this->jsonapi_controller->formatCollection(
+	// 			$this->resource_type, $modelclass::getActiveCollection()
+	// 		)
+	// 	);
+	// }//index()
+
+
 
 	//Access a web representation of a collection of resources, via GET
 	//e.g. /index/users returns Web Page with list of all Users
