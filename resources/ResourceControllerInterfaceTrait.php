@@ -4,7 +4,7 @@ namespace glasteel;
 trait ResourceControllerInterfaceTrait
 {
 	protected $renderer;
-	protected $resource_type;
+	protected $resource_model_class;
 	protected $router;
 	protected $auth_user;
 	protected $flash;
@@ -14,7 +14,7 @@ trait ResourceControllerInterfaceTrait
 	];
 
 	public function init($resource_model_class,$container){
-		$this->resource_type = $resource_model_class;
+		$this->resource_model_class = $resource_model_class;
 		$this->renderer = $container->get('renderer');
 		$this->router = $container->get('router');
 		$this->auth_user = $container->get('auth')->userGS();
@@ -23,7 +23,7 @@ trait ResourceControllerInterfaceTrait
 	}//init()
 
 
-	//TODO move to jsonapi_controller class?
+	//TODO move to jsonapi_controller class, pass in link from this class
 	protected function wrap_resource_for_get($data){
 		if ( $data['id'] ){
 			$self = $this->router->pathFor('get_single_api_' . $data['type'], [$data['type'] . '_id' => $data['id']]);
@@ -49,7 +49,7 @@ trait ResourceControllerInterfaceTrait
 	 	}
 
  		$vars['resource'] = $this->wrap_resource_for_get(
- 			$this->jsonapi_controller->getResource($this->resource_type)
+ 			$this->jsonapi_controller->getResource($this->resource_model_class)
  		);
 
  		$template = 'resources/resource_form.php';
@@ -59,12 +59,16 @@ trait ResourceControllerInterfaceTrait
 	//Submit a new single resource, via POST
 	//e.g. /create/user recieves Web Form POST of new User info
 	public function createSingle($request, $response, $args){
-		$response->write(__METHOD__ . '<br />');
-		foreach ($args as $key => $value) {
-			$response->write($key .' =<br />');
-			$response->write( print_r($value,true) );
+		$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
+		if ( $response->getStatusCode() != 200 ){
+			return $response;
 		}
 
+		$resource = new $this->resource_model_class;
+		$input = $request->getParsedBody()['data'];
+
+		$return = $this->validateAndSave($resource,$input);
+		return $response->withJsonAPI($return['to_json'],$return['code']);
 	}//createSingle()
 
 	//READ METHODS
@@ -177,7 +181,7 @@ trait ResourceControllerInterfaceTrait
 	}//gateway()
 
 	protected function getNeededCap($method){
-		return $method . '_' . $this->resource_type;
+		return $method . '_' . $this->resource_model_class;
 	}//getNeededCap()
 
 	public function addRole($role){
@@ -185,5 +189,45 @@ trait ResourceControllerInterfaceTrait
 			$this->allowed_roles[$role] = $role;
 		}
 	}//addRole()
+
+	//CRUD UTILITIES
+
+	protected function validateAndSave($resource,$input){
+		if( $resource->validateResource($input) ){
+			if ( !$resource->saveResource($input) ){
+				//Valid submission did not save due to database error
+				$code = 500;
+				$to_json = [
+					'errors' => [
+						'code' => 'failed_save',
+						'title' => 'Your submission could not be saved due to an internal error',
+					],
+				];
+			}else{
+				//Valid submission saved to database
+				$code = 200;
+				//As per http://jsonapi.org/format/#crud-updating, return entire resource b/c of e.g. last_modified 
+				$to_json = $this->wrap_resource_for_get(
+					$this->jsonapi_controller->getResource($this->resource_model_class,$resource->id)
+				);
+			}
+		}else{
+			//Invalid submission
+			$code = 409;
+			$to_json = [
+				'errors' => [
+					'code' => 'failed_validation',
+					'title' => 'Your submission contains one or more invalid or missing values',
+					'meta' => [
+						'fields' => $resource->last_validation_errors,
+					],
+				],
+			];
+		}
+		return [
+			'code' => $code,
+			'to_json' => $to_json,
+		];
+	}//validateAndSave()
 
 }//trait ResourceControllerInterfaceTrait

@@ -14,7 +14,7 @@ class Response extends \Slim\Http\Response
 	    $body->write(json_encode($data, $encodingOptions));
 
 	    return $this->withStatus($status)
-	    	->withHeader('Content-Type', FrameworkInit::JSONAPI_MEDIA_TYPE)
+	    	->withHeader('Content-Type', JSONAPI_MEDIA_TYPE)
 	    ;
 	}
 }//Response

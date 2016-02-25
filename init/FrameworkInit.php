@@ -24,6 +24,8 @@ class FrameworkInit
 		if ( !defined('SITE_NAME') ){
 			define('SITE_NAME', 'My Framework Site');
 		}
+
+		define('JSONAPI_MEDIA_TYPE',self::JSONAPI_MEDIA_TYPE);
 	}//__construct()
 
 	public function getInitialSettings(){

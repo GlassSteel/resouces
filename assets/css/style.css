@@ -1,0 +1,53 @@
+body{
+	padding-top: 47px;
+}
+
+label.control-label,
+.form-control,
+form p{
+	font-size: 13px;
+}
+
+label.control-label .last_word{
+	white-space: nowrap;
+}
+
+.table-ghost{
+	width: auto;
+	margin-bottom: 0;
+}
+
+.table-ghost td{
+	border: none !important;
+}
+
+.help_dot{
+	font-size:1.4em;
+	top:5px;
+}
+
+.well_header{
+	margin-top: 0;
+	margin-bottom: 2em;
+}
+
+.ruled_footer {
+    padding-top: 3em;
+    padding-bottom: 1em;
+    border-top: 1px solid #ddd;
+    margin-top: 3em;
+}
+
+.page-header{
+	margin-top: 0;
+	padding-bottom: 0;
+	margin-bottom: 1em;
+}
+
+.navbar{
+	margin-bottom: 0;
+}
+
+.h1 .small, .h1 small, .h2 .small, .h2 small, .h3 .small, .h3 small, .h4 .small, .h4 small, .h5 .small, .h5 small, .h6 .small, .h6 small, h1 .small, h1 small, h2 .small, h2 small, h3 .small, h3 small, h4 .small, h4 small, h5 .small, h5 small, h6 .small, h6 small {
+    line-height: 2;
+}

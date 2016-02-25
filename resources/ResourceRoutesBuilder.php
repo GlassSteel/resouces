@@ -66,8 +66,10 @@ class ResourceRoutesBuilder
 		$resource_model_implements = (class_exists($resource_model_class)) ? class_implements($resource_model_class) : [];
 		if ( !in_array(self::RESOURCE_MODEL_INTERFACE, $resource_model_implements) ){
 			//TODO exception
+			die($resource_model_class . ' must implement ' . self::RESOURCE_MODEL_INTERFACE);
 		}
 		$resource_slug = $resource_model_class::getResourceSlug();
+		//pre_r('$resource_slug = ' . $resource_slug);
 
 		//URL segments should always be lower case
 		//If no plural in config provided, append 's' to $url_single
@@ -78,6 +80,8 @@ class ResourceRoutesBuilder
 		$url_plural = strtolower(
 			(isset($config['plural']) && $config['plural']) ? $config['plural'] : $url_single . 's'
 		);
+
+		//pre_r($url_single,$url_plural);
 
 		/*
 		Determine the class to be used as the controller for the CRUD routes
@@ -113,12 +117,12 @@ class ResourceRoutesBuilder
 		//controller class must implement ResourceControllerInterface else throw exception
 		$controller_implements = (class_exists($controller_class)) ? class_implements($controller_class) : [];
 		if ( !in_array(self::RESOURCE_CONTROLLER_INTERFACE, $controller_implements) ){
-			die('not implementing ' . self::RESOURCE_CONTROLLER_INTERFACE);
+			die($controller_class . ' must implement ' . self::RESOURCE_CONTROLLER_INTERFACE);
 			//TODO exception
 		}
 
 		//Instantiate the controller and register with the app container
-		$container[$controller_class] = function($c) use ($controller_class,$resource_model_class){
+		$container[$controller_class . '_' . $resource_slug] = function($c) use ($controller_class,$resource_model_class){
 			$controller = new $controller_class;
 			$controller->init($resource_model_class,$c);
 			return $controller;
@@ -135,7 +139,7 @@ class ResourceRoutesBuilder
 		//e.g. /new/user returns Web Form for new User info
 		$route_key = 'get_new_single_form';
 		$route = '/new/' . $url_single;
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 		$routes_registered[$route_key] = $route;
@@ -144,7 +148,7 @@ class ResourceRoutesBuilder
 		//e.g. /create/user recieves Web Form POST of new User info
 		$route_key = 'create_single';
 		$route = '/create/' . $url_single;
-		$app->post($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->post($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 		$routes_registered[$route_key] = $route;
@@ -155,7 +159,7 @@ class ResourceRoutesBuilder
 		//e.g. /api/user/2 returns JSON representation of User with ID = 2
 		$route_key = 'get_single_api';
 		$route = '/api/' . $url_single . '/{' . $resource_slug . '_id}';
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 			->add('IdParamsJSONAPI')	//TODO Make method of JSON API class?
 			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
@@ -167,7 +171,7 @@ class ResourceRoutesBuilder
 		//e.g. /view/user/2 returns Web Page with info on User with ID = 2
 		$route_key = 'get_single_view';
 		$route = '/view/' . $url_single . '/{' . $resource_slug . '_id}';
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
 			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
@@ -178,7 +182,7 @@ class ResourceRoutesBuilder
 		//e.g. /api/users returns JSON representation of all Users
 		$route_key = 'get_collection_api';
 		$route = '/api/' . $url_plural;
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 
@@ -186,7 +190,7 @@ class ResourceRoutesBuilder
 		//e.g. /index/users returns Web Page with list of all Users
 		$route_key = 'get_collection_web';
 		$route = '/index/' . $url_plural;
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 
@@ -196,7 +200,7 @@ class ResourceRoutesBuilder
 		//e.g. /edit/user/2 returns Web Form for editing User with ID = 2
 		$route_key = 'get_edit_single_form';
 		$route = '/edit/' . $url_single  . '/{' . $resource_slug . '_id}';
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 		$routes_registered[$route_key] = $route;
@@ -205,7 +209,7 @@ class ResourceRoutesBuilder
 		//e.g. /update/user recieves Web Form POST of edits for User with ID = 2
 		$route_key = 'update_single';
 		$route = '/update/' . $url_single  . '/{' . $resource_slug . '_id}';
-		$app->post($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->post($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 		$routes_registered[$route_key] = $route;
@@ -216,7 +220,7 @@ class ResourceRoutesBuilder
 		//e.g. /confirm/user/2 returns Web Form for confirming deletion of User with ID = 2
 		$route_key = 'get_delete_single_form';
 		$route = '/confirm/' . $url_single  . '/{' . $resource_slug . '_id}';
-		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 		$routes_registered[$route_key] = $route;
@@ -225,7 +229,7 @@ class ResourceRoutesBuilder
 		//e.g. /delete/user recieves Web Form POST of User ID = 2 confirmed deletion
 		$route_key = 'delete_single';
 		$route = '/delete/' . $url_single  . '/{' . $resource_slug . '_id}';
-		$app->post($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
+		$app->post($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
 		$routes_registered[$route_key] = $route;

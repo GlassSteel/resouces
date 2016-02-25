@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% if title is defined %}{{ title }} | {% endif %}{{ constant('SITE_NAME') }}</title>
     
-    <link href="/assets/css/lib.min.css" rel="stylesheet">
-    <link href="/assets/css/style.css" rel="stylesheet">
+    <link href="/vendor/glasteel/resources/assets/css/lib.min.css" rel="stylesheet">
+    <link href="/vendor/glasteel/resources/assets/css/style.css" rel="stylesheet">
     
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -83,7 +83,7 @@
         <div class="container">
             <div class="row ruled_footer">
                 <div class="col-xs-6 col-sm-6 col-md-4">
-                    <img class="img-responsive" src="/assets/images/logo_750w.png"/>
+                    <img class="img-responsive" src="/vendor/glasteel/resources/assets/images/logo_750w.png"/>
                 </div>
             </div><!-- .row -->
             <div class="row">
@@ -100,7 +100,7 @@
 
     <!-- Scripts -->
     
-    <script type="text/javascript" src="/assets/js/lib.min.js"></script>
+    <script type="text/javascript" src="/vendor/glasteel/resources/assets/js/lib.min.js"></script>
 
     <script>
         /**

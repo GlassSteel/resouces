@@ -1,0 +1,34 @@
+{
+  "name": "sa_slim",
+  "version": "0.0.0",
+  "authors": [
+    "Paul Glass-Steel <glasteel@email.unc.edu>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.1",
+    "bootswatch-dist": "yeti",
+    "fontawesome": "~4.3.0",
+    "bootstrap-filestyle": "~1.1.2",
+    "ng-file-upload": "~5.0.9",
+    "angular-bootstrap": "~0.14.3",
+    "underscore": "~1.8.3"
+  },
+  "resolutions": {
+    "angular": "~1.4.1"
+  },
+  "overrides": {
+    "bootswatch-dist": {
+      "main": [
+        "css/bootstrap.min.css"
+      ]
+    }
+  }
+}
