@@ -9,7 +9,7 @@ class IdParamsJSONAPI extends middlewareBase
     protected $db;
     protected $jsonapi;
 
-    public function __construct( RedBeanWrapper $db, JSONApiController $jsonapi){
+    public function __construct(RedBeanWrapper $db, JSONApiController $jsonapi){
         $this->db = $db;
         $this->jsonapi = $jsonapi;
     }

@@ -5,6 +5,7 @@ class FrameworkInit
 {
 
 	protected $root_dir;
+	protected $framework_dir;
 
 	const JSONAPI_MEDIA_TYPE = 'application/vnd.api+json';
 
@@ -18,6 +19,11 @@ class FrameworkInit
 		// Load variables from .env
 		$this->dotenv();
 
+		$this->framework_dir = __DIR__ . '/..';
+
+		if ( !defined('SITE_NAME') ){
+			define('SITE_NAME', 'My Framework Site');
+		}
 	}//__construct()
 
 	public function getInitialSettings(){
@@ -66,17 +72,20 @@ class FrameworkInit
 		// Twig view renderer
 		$container['renderer'] = function ($c) {
 			$settings = $c->get('settings')['renderer'];
-			$view = new \Slim\Views\Twig($settings['template_path'], $settings);
+			$twig = new \Slim\Views\Twig($settings['template_path'], $settings);
 
-			$view->addExtension(new \Twig_Extension_Debug());
+			$twig->addExtension(new \Twig_Extension_Debug());
 
 			// Instantiate and add Slim specific extension
-		    $view->addExtension(new \Slim\Views\TwigExtension(
+		    $twig->addExtension(new \Slim\Views\TwigExtension(
 		        $c['router'],
 		        $c['request']->getUri()
 		    ));
 
-		    return $view;
+		    $loader = $twig->getLoader();
+		    $loader->addPath( $this->framework_dir . '/templates');
+
+		    return $twig;
 		};
 
 		//https://github.com/slimphp/Slim-Flash
@@ -144,7 +153,6 @@ class FrameworkInit
 		//Set up authorized user, if one exists, via PID from AuthUserFromSSO and User from RedBeanPHP
 		//Add is_auth flag and auth_user object to Twig (renderer) vars
 		$slim->add(function ($request, $response, $next){
-		    $response->write('do auth</br >');
 		    $this->renderer->offsetSet('is_auth',false);
 		    $pid = $this->auth->getPID();
 		    if ( $pid ){
@@ -164,8 +172,7 @@ class FrameworkInit
 
 		//inject db into models
 		$slim->add(function ($request, $response, $next){
-			$response->write('inject db</br >');
-		    ModelBase::setDB($this->db,$response);
+			ModelBase::setDB($this->db,$response);
 		    $response = $next($request, $response);
 		    return $response;
 		});

@@ -72,7 +72,7 @@ class ResourceRoutesBuilder
 		//URL segments should always be lower case
 		//If no plural in config provided, append 's' to $url_single
 		$url_single = strtolower(
-			(isset($config['single']) && $config['single']) ? $config['single'] : $resource_slug . 's'
+			(isset($config['single']) && $config['single']) ? $config['single'] : $resource_slug
 		);
 
 		$url_plural = strtolower(
@@ -113,6 +113,7 @@ class ResourceRoutesBuilder
 		//controller class must implement ResourceControllerInterface else throw exception
 		$controller_implements = (class_exists($controller_class)) ? class_implements($controller_class) : [];
 		if ( !in_array(self::RESOURCE_CONTROLLER_INTERFACE, $controller_implements) ){
+			die('not implementing ' . self::RESOURCE_CONTROLLER_INTERFACE);
 			//TODO exception
 		}
 
@@ -156,9 +157,9 @@ class ResourceRoutesBuilder
 		$route = '/api/' . $url_single . '/{' . $resource_slug . '_id}';
 		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
-			//->add('IdParamsJSONAPI')	//TODO Make method of JSON API class?
-			//->add('IdParamsExist')		//TODO Make method of Resource Model Class?
-			//->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
+			->add('IdParamsJSONAPI')	//TODO Make method of JSON API class?
+			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
+			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
 		$routes_registered[$route_key] = $route;
 
@@ -168,9 +169,8 @@ class ResourceRoutesBuilder
 		$route = '/view/' . $url_single . '/{' . $resource_slug . '_id}';
 		$app->get($route, $controller_class . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
-			//->add('IdParamsJSONAPI')	//TODO Make method of JSON API class?
-			//->add('IdParamsExist')		//TODO Make method of Resource Model Class?
-			//->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
+			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
+			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
 		$routes_registered[$route_key] = $route;
 

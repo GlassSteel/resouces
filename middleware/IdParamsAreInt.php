@@ -12,6 +12,7 @@ class IdParamsAreInt extends middlewareBase
 
         $route = $request->getAttribute('route');
         $route_args = $route->getArguments();
+
         
         foreach ( $this->filterAttrs($route_args)  as $key => $value) {
             if ( !preg_match('/^[1-9]+[0-9]*$/',$value) && $this->okToOverwrite($response,404) ){

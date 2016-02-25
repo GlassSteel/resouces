@@ -13,13 +13,12 @@ class JSONApiController
 
 	//get single resource
 	// @param $resource is instanceof $resource_class or id of same
-	public function getResource($type,$resource=null,$flat=false)
-		$resource_class = __NAMESPACE__ . '\\' . ucfirst($type);
+	public function getResource($resource_class,$resource=null,$flat=false){
 		if ( !( $resource instanceof $resource_class ) ){
 			$resource = new $resource_class($resource);
 		}
 		$id = $resource->id;
-		
+		$type = $resource_class::getResourceSlug();
 		$relationships = ($id) ? $resource->getResourceRelationships() : false;
 		$included = ($id) ? $resource->getResourceIncluded() : false;
 		
@@ -57,8 +56,7 @@ class JSONApiController
 				}
 			}
 		}
-
 		return $json;
-	}//get()
+	}//getResource()
 
 }//ApiController

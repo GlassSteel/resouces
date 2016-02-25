@@ -8,7 +8,7 @@ class IdParamsExist extends middlewareBase
 {
     protected $db;
 
-    public function __construct( RedBeanWrapper $db){
+    public function __construct(RedBeanWrapper $db){
         $this->db = $db;
     }
 
