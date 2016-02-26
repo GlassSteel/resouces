@@ -63,12 +63,78 @@
 	    .module('ThisForm',['ui.bootstrap','ngFileUpload','underscore'])
 	    .controller('Form_Controller',Form_Controller)
 	    .controller('RelationOptions_Controller',RelationOptions_Controller)
+	    .controller('MilestonetypeConfigController',MilestonetypeConfigController)
 	;
 	
 	angular.element(document).ready(function() {
 	    var el = document.getElementById('ThisForm');
 	    angular.bootstrap(el, ['ThisForm']);
 	});
+
+	function MilestonetypeConfigController($http){
+		var vm = this;
+		vm.milestonetype_collection = {};
+		vm.main_ctrl_data;
+
+		vm.setMainCtrlData = function(data){
+			vm.main_ctrl_data = data;
+			_.map(vm.main_ctrl_data,function(element,index,list){
+				if ( !(element.hasOwnProperty('meta')) ){
+					element.meta = {};
+				}
+				if ( !(element.meta.hasOwnProperty('alt_name')) ){
+					element.meta.alt_name = '';
+				}
+			});
+		}
+
+		vm.getMilestonetypeCollection = function(url){
+			$http({
+				method: 'get',
+				url: url,
+				headers: {
+					'Accept' : '{{ constant('JSONAPI_MEDIA_TYPE') }}',
+					'Content-Type' : '{{ constant('JSONAPI_MEDIA_TYPE') }}'
+				},
+				cache: true,
+			}).then(function successCallback(response) {
+				vm.milestonetype_collection = response.data.data;
+			}, function errorCallback(response) {
+				//TODO
+			});
+		}
+
+		vm.getMstName = function(mst_id){
+			var mst = _.find(vm.milestonetype_collection,function(element, index, list){
+				return ( angular.isDefined(element) && element.id == mst_id );
+			});
+			if ( mst ){
+				return mst.meta.instance_name;
+			}
+		}
+
+		vm.MstAltnameGS = function(mst_id){
+			console.log('MstAltnameGS called, mst_id = ' + mst_id);
+			return function(val){
+				if ( angular.isDefined(val) ){
+					_.map(vm.main_ctrl_data,function(element,index,list){
+						if ( element.id == mst_id ){
+							element.meta.alt_name = val;
+						}
+					});
+				}
+				var has = _.find(vm.main_ctrl_data, function(element,index,list){
+					return element.id == mst_id;
+				});
+				if ( angular.isDefined(has) ){
+					return has.meta.alt_name;
+				}
+				return '';
+			}
+				
+
+		}	
+	}
 
 	function RelationOptions_Controller($http){
 		var vm = this;
@@ -81,11 +147,12 @@
 	    		headers: {
 	    			'Accept' : '{{ constant('JSONAPI_MEDIA_TYPE') }}',
 	    			'Content-Type' : '{{ constant('JSONAPI_MEDIA_TYPE') }}'
-	    		}
+	    		},
+	    		cache: true,
 	    	}).then(function successCallback(response) {
 	    		vm.options = response.data.data;
 	    	}, function errorCallback(response) {
-    			console.log(response);
+    			//TODO
     		});
 		}
 	}

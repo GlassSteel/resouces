@@ -129,8 +129,8 @@ trait ResourceModelInterfaceTrait
 				' id IN (' . $this->db->genSlots($new_relateds_ids) . ')', //TODO test active
 				$new_relateds_ids
 			);
-			//TODO remove exportAll & count $db rows?
-			if ( count($this->db->exportAll($beans)) != count($new_relateds_ids) ){
+			
+			if ( count($beans) != count($new_relateds_ids) ){
 				return false;
 			}else{
 				return true;

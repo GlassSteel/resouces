@@ -61,10 +61,16 @@ trait ResourceControllerInterfaceTrait
 				$class = $relationship_classes[$rel];
 				if ( is_array($members) ){
 					foreach ($members as $idx => $member) {
-						$json['relationships'][$rel][] = [
+						$rel_data = [
 							'type' => $class::getResourceSlug(),
 							'id' => $member->id,
 						];
+
+						if ( method_exists($resource, 'getResourceRelationshipMeta') ){
+							$rel_data['meta'] = $resource->getResourceRelationshipMeta($rel,$member);
+						}
+
+						$json['relationships'][$rel][] = $rel_data;
 					}
 				}
 				$this->relationships_for_meta[$rel] = $class::getResourceSlug();

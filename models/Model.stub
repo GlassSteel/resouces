@@ -1,0 +1,72 @@
+<?php
+namespace glasteel;
+
+class MODEL extends ModelBase
+{
+	protected $primary_bean_table = 'SLUG';
+	protected static $pbt = 'SLUG';
+	
+	public function getResourceAttributes(){
+		return [
+			'name' => $this->name, //required
+		];
+	}//getResourceAttributes()
+
+	protected function validateOwnAttributes(){
+		$this->validateRequired('name');
+	}//validateOwnAttributes()
+
+	public function getResourceRelationships($key=false){
+		if ( $key && $key = 'REL' ){
+			return $this->getAllREL();
+		}
+		return [
+			'REL' => $this->getAllREL(),
+		];
+	}//getResourceRelationships()
+
+	public static function getResourceRelationshipClasses(){
+		return [
+			'REL' => __NAMESPACE__ . '\\RELCLASS',
+		];
+	}//getResourceRelationshipClasses()
+
+	//TODO error checking
+	protected function addRelated($relationship,$obj){
+		switch ( $relationship ){
+			case 'roles':
+				return $this->db->exec(
+					'INSERT INTO user_role (user_id, role_slug, active) 
+						VALUES (:user_id, :role_slug, 1)',
+					[
+						':user_id' => $this->id,
+						':role_slug' => $obj->slug,
+					]
+				);
+			break;
+		}
+		return false;
+	}//addRelated()
+
+	//TODO error checking
+	protected function removeRelated($relationship,$obj){
+		switch ( $relationship ){
+			case 'roles':
+				$link = $this->db->findOne(
+					'user_role',
+					'user_id = :user_id AND role_slug = :role_slug',
+					[
+						':user_id' => $this->id,
+						':role_slug' => $obj->slug,
+					]
+				);
+				if( $link ){
+					$this->db->trash($link);
+				}
+				return !($this->is($obj->slug));
+			break;
+		}
+		return false;
+	}//removeRelated()
+
+}//class User
