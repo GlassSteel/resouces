@@ -103,6 +103,7 @@ class FrameworkInit
 				$c->environment['DB_USER'],
 				$c->environment['DB_PASS']
 			);
+			$db->freeze(true);
 			return $db;
 		};
 

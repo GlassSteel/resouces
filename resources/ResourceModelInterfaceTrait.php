@@ -90,9 +90,7 @@ trait ResourceModelInterfaceTrait
 			if ( !array_key_exists($relationship, $valid_relationships) ){
 				return false;
 			}
-			if ( !($this->validateOrSaveRelationship($relationship,$submitted_relateds,$action)) ){
-				return false;
-			}
+			return ($this->validateOrSaveRelationship($relationship,$submitted_relateds,$action)) ? true : false;;
 		}
 		return true;
 	}//validateResourceRelationships()
@@ -132,13 +130,18 @@ trait ResourceModelInterfaceTrait
 				$new_relateds_ids
 			);
 			//TODO remove exportAll & count $db rows?
-			return ( count($this->db->exportAll($beans)) == count($new_relateds_ids) ) ? true : false;
+			if ( count($this->db->exportAll($beans)) != count($new_relateds_ids) ){
+				return false;
+			}else{
+				return true;
+			}
 		}
 
 		if ( $action == 'save' ){
 			$current_relateds = $this->getResourceRelationships($relationship);
 			$current_ids = [];
 			foreach ($current_relateds as $idx => $current_related) {
+				$current_ids[] = $current_related->id;
 				if ( !(in_array($current_related->id, $new_relateds_ids)) ){
 					if ( !($this->removeRelated($relationship,$current_related)) ){
 						return false;

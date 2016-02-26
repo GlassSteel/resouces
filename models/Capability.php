@@ -49,45 +49,21 @@ class Capability extends ModelBase
 
 	//TODO error checking
 	protected function addRelated($relationship,$obj){
-		// switch ( $relationship ){
-		// 	case 'roles':
-		// 		if ( $this->is($to_add->slug) ){
-		// 			return true;
-		// 		}
-		// 		return $this->db->exec(
-		// 			'INSERT INTO user_role (user_id, role_slug, active) 
-		// 				VALUES (:user_id, :role_slug, 1)',
-		// 			[
-		// 				':user_id' => $this->id,
-		// 				':role_slug' => $to_add->slug,
-		// 			]
-		// 		);
-		// 	break;
-		// }
+		switch ( $relationship ){
+			case 'roles':
+				return $obj->addCap($this->slug);
+			break;
+		}
 		return false;
 	}//addRelated()
 
 	//TODO error checking
 	protected function removeRelated($relationship,$obj){
-		// switch ( $relationship ){
-		// 	case 'roles':
-		// 		if ( !($this->is($to_remove->slug)) ){
-		// 			return true;
-		// 		}
-		// 		$link = $this->db->findOne(
-		// 			'user_role',
-		// 			'user_id = :user_id AND role_slug = :role_slug',
-		// 			[
-		// 				':user_id' => $this->id,
-		// 				':role_slug' => $to_remove->slug,
-		// 			]
-		// 		);
-		// 		if( $link ){
-		// 			$this->db->trash($link);
-		// 		}
-		// 		return !($this->is($to_remove->slug));
-		// 	break;
-		// }
+		switch ( $relationship ){
+			case 'roles':
+				return $obj->removeCap($this->slug);
+			break;
+		}
 		return false;
 	}//removeRelated()
 
