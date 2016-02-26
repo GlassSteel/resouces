@@ -14,18 +14,14 @@ interface ResourceModelInterface
 	/**
 	 * 
 	 */
-	public function getResourceRelationships();
+	public function getResourceRelationships($key=false);
+
 
 	/**
 	 * 
 	 */
 	public static function getResourceRelationshipClasses();
-
-	/**
-	 * 
-	 */
-	public function getResourceIncluded();
-
+	
 
 	/**
 	 * 

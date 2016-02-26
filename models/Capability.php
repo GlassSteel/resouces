@@ -19,67 +19,6 @@ class Capability extends ModelBase
 		];
 	}//getResourceAttributes()
 
-	//TODO abstract this in ModelBase?
-	public function getResourceRelationships(){
-		return [
-			'role' => $this->getRolesUsingThis(),
-		];
-	}//getResourceRelationships()
-
-	//TODO abstract this in ModelBase?
-	// protected function validateResourceRelationships($input){
-	// 	return $this->validateOrSaveRoles($input);
-	// }//validateResourceRelationships()
-
-	// protected function saveResourceRelationships($input){
-	// 	return $this->validateOrSaveRoles($input,'save');
-	// }//saveResourceRelationships()
-
-	// private function validateOrSaveRoles($input,$action='validate'){
-	// 	if ( $action != 'validate' && $action != 'save' ){
-	// 		//TODO exception
-	// 		return false;
-	// 	}
-			
-	// 	$submitted_roles = isset($input['role']) ? $input['role'] : false;
-	// 	if ( !$submitted_roles ){
-	// 		return true;
-	// 	}
-		
-	// 	$new_role_ids = [];
-	// 	foreach ($submitted_roles as $idx => $role_id_object) {
-	// 		if ( $role_id_object['type'] != 'role' ){
-	// 			return false;	
-	// 		}
-	// 		$new_role_ids[] = $role_id_object['id'];
-	// 	}
-
-	// 	if ( $action == 'validate' ){
-	// 		$role_beans = $this->db->find(
-	// 			'role',
-	// 			' id IN (' . $this->db->genSlots($new_role_ids) . ')', //TODO test active
-	// 			$new_role_ids
-	// 		);
-	// 		//TODO remove exportAll & count $db rows?
-	// 		return ( count($this->db->exportAll($role_beans)) == count($new_role_ids) ) ? true : false;
-	// 	}
-
-	// 	if ( $action == 'save' ){
-	// 		foreach (Role::getActiveCollection() as $idx => $role) {
-				
-	// 			if ( in_array($role->id, $new_role_ids) ){
-	// 				$mod = $role->addCap($this->slug);
-	// 			}else{
-	// 				$mod = $role->removeCap($this->slug);
-	// 			}
-	// 			if (!$mod) {
-	// 				return false;
-	// 			}
-	// 		}
-	// 		return true;
-	// 	}
-	// }//validateOrSaveRoles()
-
 	protected function validateOwnAttributes(){
 		if ( $this->validateRequired('name') ){
 			$this->validateUnique('name');
@@ -89,8 +28,67 @@ class Capability extends ModelBase
 		}
 	}//validateOwnAttributes()
 
+	public function getResourceRelationships($key=false){
+		if ($key && $key == 'roles' ){
+			return $this->getRolesUsingThis();
+		}
+		return [
+			'roles' => $this->getRolesUsingThis(),
+		];
+	}//getResourceRelationships()
+
+	public static function getResourceRelationshipClasses(){
+		return [
+			'roles' => __NAMESPACE__ . '\\Role',
+		];
+	}//getResourceRelationshipClasses()
+
 	protected function getRolesUsingThis(){
 		return Role::rolesUsingCap($this->slug);
 	}//getRolesUsingThis()
+
+	//TODO error checking
+	protected function addRelated($relationship,$obj){
+		// switch ( $relationship ){
+		// 	case 'roles':
+		// 		if ( $this->is($to_add->slug) ){
+		// 			return true;
+		// 		}
+		// 		return $this->db->exec(
+		// 			'INSERT INTO user_role (user_id, role_slug, active) 
+		// 				VALUES (:user_id, :role_slug, 1)',
+		// 			[
+		// 				':user_id' => $this->id,
+		// 				':role_slug' => $to_add->slug,
+		// 			]
+		// 		);
+		// 	break;
+		// }
+		return false;
+	}//addRelated()
+
+	//TODO error checking
+	protected function removeRelated($relationship,$obj){
+		// switch ( $relationship ){
+		// 	case 'roles':
+		// 		if ( !($this->is($to_remove->slug)) ){
+		// 			return true;
+		// 		}
+		// 		$link = $this->db->findOne(
+		// 			'user_role',
+		// 			'user_id = :user_id AND role_slug = :role_slug',
+		// 			[
+		// 				':user_id' => $this->id,
+		// 				':role_slug' => $to_remove->slug,
+		// 			]
+		// 		);
+		// 		if( $link ){
+		// 			$this->db->trash($link);
+		// 		}
+		// 		return !($this->is($to_remove->slug));
+		// 	break;
+		// }
+		return false;
+	}//removeRelated()
 
 }//class Capability

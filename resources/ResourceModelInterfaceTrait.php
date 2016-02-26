@@ -18,17 +18,13 @@ trait ResourceModelInterfaceTrait
 		return $this->name;
 	}//getInstanceName()
 
-	public function getResourceRelationships(){
+	public function getResourceRelationships($key=false){
 		return false;
 	}//getResourceRelationships()
 
 	public static function getResourceRelationshipClasses(){
 		return [];
 	}//getResourceRelationshipClasses()
-
-	public function getResourceIncluded(){
-		return false;
-	}//getResourceIncluded()
 
 	public function validateResource($input){
 		if ( !isset($input['relationships']) ){

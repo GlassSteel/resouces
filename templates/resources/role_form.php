@@ -17,4 +17,10 @@
 		required: true,
 	} %}
 
+	{% include 'form_elements/relation.php' with {
+		label:'Capabilities',
+		element: 'checkbox',
+		relationship: 'capabilities',
+	} %}	
+
 {% endblock %}

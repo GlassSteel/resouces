@@ -40,7 +40,6 @@ trait ResourceControllerInterfaceTrait
 		$id = $resource->id;
 		$slug = $resource_class::getResourceSlug();
 		$relationships = $resource->getResourceRelationships();
-		$included = ($id) ? $resource->getResourceIncluded() : false;
 		
 		$json = [
 			'type' => $slug,
@@ -72,15 +71,6 @@ trait ResourceControllerInterfaceTrait
 			}
 		}
 
-		if ( $included && $flat !== true ){
-			$json['included'] = [];
-			foreach ($included as $rel => $members) {
-				$json['included'][$rel] = [];
-				foreach ($members as $idx => $member) {
-					$json['included'][$rel][] = $this->formatSingle($rel,$member->id,true);
-				}
-			}
-		}
 		return $json;
 	}//formatSingle()
 

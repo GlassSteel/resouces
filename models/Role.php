@@ -14,7 +14,19 @@ class Role extends ModelBase
 		];
 	}//getResourceAttributes()
 
-	public function getResourceRelationships(){
+	protected function validateOwnAttributes(){
+		if ( $this->validateRequired('name') ){
+			$this->validateUnique('name');
+		}
+		if ( $this->validateRequired('slug') ){
+			$this->validateUnique('slug');
+		}
+	}//validateOwnAttributes()
+
+	public function getResourceRelationships($key=false){
+		if ( $key && $key = 'capabilities' ){
+			return $this->getAllCapabilities();
+		}
 		return [
 			'capabilities' => $this->getAllCapabilities(),
 		];
@@ -25,6 +37,26 @@ class Role extends ModelBase
 			'capabilities' => __NAMESPACE__ . '\\Capability',
 		];
 	}//getResourceRelationshipClasses()
+
+	//TODO error checking
+	protected function addRelated($relationship,$obj){
+		switch ( $relationship ){
+			case 'capabilities':
+				return $this->addCap($obj->slug);
+			break;
+		}
+		return false;
+	}//addRelated()
+
+	//TODO error checking
+	protected function removeRelated($relationship,$obj){
+		switch ( $relationship ){
+			case 'capabilities':
+				return $this->removeCap($obj->slug);
+			break;
+		}
+		return false;
+	}//removeRelated()
 
 	private function getAllCapabilities(){
 		$sql = 
@@ -51,15 +83,6 @@ class Role extends ModelBase
 		return $objs;
 	}//getAllRoles()
 	
-	protected function validateOwnAttributes(){
-		if ( $this->validateRequired('name') ){
-			$this->validateUnique('name');
-		}
-		if ( $this->validateRequired('slug') ){
-			$this->validateUnique('slug');
-		}
-	}//validateOwnAttributes()
-
 	public static function rolesUsingCap($cap_slug){
 		$roles = [];
 		$_roles = self::$DB->getAll('

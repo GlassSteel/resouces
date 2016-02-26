@@ -49,10 +49,10 @@ class User extends ModelBase
 	}//getResourceRelationshipClasses()
 
 	//TODO error checking
-	protected function addRelated($relationship,$to_add){
+	protected function addRelated($relationship,$obj){
 		switch ( $relationship ){
 			case 'roles':
-				if ( $this->is($to_add->slug) ){
+				if ( $this->is($obj->slug) ){
 					return true;
 				}
 				return $this->db->exec(
@@ -60,7 +60,7 @@ class User extends ModelBase
 						VALUES (:user_id, :role_slug, 1)',
 					[
 						':user_id' => $this->id,
-						':role_slug' => $to_add->slug,
+						':role_slug' => $obj->slug,
 					]
 				);
 			break;
@@ -69,10 +69,10 @@ class User extends ModelBase
 	}//addRelated()
 
 	//TODO error checking
-	protected function removeRelated($relationship,$to_remove){
+	protected function removeRelated($relationship,$obj){
 		switch ( $relationship ){
 			case 'roles':
-				if ( !($this->is($to_remove->slug)) ){
+				if ( !($this->is($obj->slug)) ){
 					return true;
 				}
 				$link = $this->db->findOne(
@@ -80,13 +80,13 @@ class User extends ModelBase
 					'user_id = :user_id AND role_slug = :role_slug',
 					[
 						':user_id' => $this->id,
-						':role_slug' => $to_remove->slug,
+						':role_slug' => $obj->slug,
 					]
 				);
 				if( $link ){
 					$this->db->trash($link);
 				}
-				return !($this->is($to_remove->slug));
+				return !($this->is($obj->slug));
 			break;
 		}
 		return false;
