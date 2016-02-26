@@ -5,7 +5,7 @@ class Role extends ModelBase
 {
 	protected $primary_bean_table = 'role';
 	protected static $pbt = 'role';
-	
+
 	public function getResourceAttributes(){
 		return [
 			'name' => $this->name, //required, unique
@@ -13,6 +13,43 @@ class Role extends ModelBase
 			'slug' => $this->slug, //required, unique
 		];
 	}//getResourceAttributes()
+
+	public function getResourceRelationships(){
+		return [
+			'capabilities' => $this->getAllCapabilities(),
+		];
+	}//getResourceRelationships()
+
+	public static function getResourceRelationshipClasses(){
+		return [
+			'capabilities' => __NAMESPACE__ . '\\Capability',
+		];
+	}//getResourceRelationshipClasses()
+
+	private function getAllCapabilities(){
+		$sql = 
+			"SELECT c.*
+
+			FROM capability AS c
+
+				JOIN {$this->primary_bean_table}_capability AS jr ON jr.capability_slug = c.slug
+			
+			WHERE jr.role_slug = :this_slug
+				AND c.active = 1
+				AND jr.active = 1;
+		";//sql
+
+		$rows = $this->db->getAll($sql,[
+			':this_slug' => $this->slug,
+		]);
+
+		$beans = $this->db->convertToBeans('role',$rows);
+		$objs = [];
+		foreach ($beans as $idx => $bean) {
+			$objs[] = new Capability($bean);
+		}
+		return $objs;
+	}//getAllRoles()
 	
 	protected function validateOwnAttributes(){
 		if ( $this->validateRequired('name') ){

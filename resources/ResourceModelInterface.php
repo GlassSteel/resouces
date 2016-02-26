@@ -16,6 +16,10 @@ interface ResourceModelInterface
 	 */
 	public function getResourceRelationships();
 
+	/**
+	 * 
+	 */
+	public static function getResourceRelationshipClasses();
 
 	/**
 	 * 

@@ -62,12 +62,33 @@
 	angular
 	    .module('ThisForm',['ui.bootstrap','ngFileUpload','underscore'])
 	    .controller('Form_Controller',Form_Controller)
+	    .controller('RelationOptions_Controller',RelationOptions_Controller)
 	;
 	
 	angular.element(document).ready(function() {
 	    var el = document.getElementById('ThisForm');
 	    angular.bootstrap(el, ['ThisForm']);
 	});
+
+	function RelationOptions_Controller($http){
+		var vm = this;
+		vm.options = {};
+
+		vm.setOptions = function(collection_url){
+			$http({
+	    		method: 'get',
+	    		url: collection_url,
+	    		headers: {
+	    			'Accept' : '{{ constant('JSONAPI_MEDIA_TYPE') }}',
+	    			'Content-Type' : '{{ constant('JSONAPI_MEDIA_TYPE') }}'
+	    		}
+	    	}).then(function successCallback(response) {
+	    		vm.options = response.data.data;
+	    	}, function errorCallback(response) {
+    			console.log(response);
+    		});
+		}
+	}
 
 	function Form_Controller($http,$timeout){
 	    var vm = this;
@@ -81,6 +102,34 @@
 	    vm.flash_type = 'success';
 	    vm.errors = false;
 	    vm.old_resource = angular.copy(vm.resource);
+
+	    vm.relationGS = function(option_id,relationship,type){
+	    	return function(val){
+	    		var relateds = vm.resource.data.relationships[relationship];
+	    		if ( angular.isDefined(val) ){
+	    			if ( val ){
+	    				if ( !_.find(relateds, function(el, index, list){
+	    					return ( angular.isDefined(el) && el.id == option_id );
+	    				}) ){
+	    					relateds.push({
+	    						'type' : type,
+	    						'id' : option_id,
+	    					});
+	    				}
+	    			}else{
+	    				_.each(relateds, function(ele, index, list){
+	    					if ( angular.isDefined(ele) && ele.id == option_id ){
+	    						relateds.splice(index,1);
+	    					}
+	    				});
+	    			}
+	    		}
+	    		var has = _.find(relateds, function(element, index, list){
+	    			return ( angular.isDefined(element) && element.id == option_id );
+	    		});
+	    		return angular.isDefined(has);
+	    	};
+	    }
 
 	    vm.clearFlash = function(){
 	    	vm.flash = false;

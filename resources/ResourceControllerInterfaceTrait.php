@@ -8,10 +8,10 @@ trait ResourceControllerInterfaceTrait
 	protected $router;
 	protected $auth_user;
 	protected $flash;
-	protected $jsonapi_controller;
 	protected $allowed_roles = [
 		'resource_editor' => 'resource_editor'
 	];
+	protected $relationships_for_meta = [];
 
 	public function init($resource_model_class,$container){
 		$this->resource_model_class = $resource_model_class;
@@ -19,24 +19,102 @@ trait ResourceControllerInterfaceTrait
 		$this->router = $container->get('router');
 		$this->auth_user = $container->get('auth')->userGS();
 		$this->flash = $container->get('flash');
-		$this->jsonapi_controller = $container->get('jsonapi');
 	}//init()
 
-
-	//TODO move to jsonapi_controller class, pass in link from this class
-	protected function wrap_resource_for_get($data){
-		if ( $data['id'] ){
-			$self = $this->router->pathFor('get_single_api_' . $data['type'], [$data['type'] . '_id' => $data['id']]);
-		}else{
-			$self = $this->router->pathFor('create_single_' . $data['type']);
+	// format resource collection
+	// @param $resources is instances of $resource_class or ids of same
+	public function formatCollection($resource_class,$resources){
+		$collection = [];
+		foreach ($resources as $idx => $resource) {
+			$collection[] = $this->formatSingle($resource_class,$resource);
 		}
+		return $collection;
+	}//getCollection()
+
+	// format single resource
+	// @param $resource is instanceof $resource_class or id of same
+	public function formatSingle($resource_class,$resource=null,$flat=false){
+		if ( !( $resource instanceof $resource_class ) ){
+			$resource = new $resource_class($resource);
+		}
+		$id = $resource->id;
+		$slug = $resource_class::getResourceSlug();
+		$relationships = $resource->getResourceRelationships();
+		$included = ($id) ? $resource->getResourceIncluded() : false;
+		
+		$json = [
+			'type' => $slug,
+			'id' => ($id) ? $id : 0,
+			'attributes' => ($id) ? $resource->getResourceAttributes() : new \stdclass,
+			'meta' => [
+				'resource_nicename' => $resource::getResourceNicename(),
+				'instance_name' => ($id) ? $resource->getInstanceName() : '',
+			],
+
+		];
+
+		if ( $relationships ){
+			$json['relationships'] = [];
+			$relationship_classes = $resource::getResourceRelationshipClasses();
+			
+			foreach ($relationships as $rel => $members) {
+				$json['relationships'][$rel] = [];
+				$class = $relationship_classes[$rel];
+				if ( is_array($members) ){
+					foreach ($members as $idx => $member) {
+						$json['relationships'][$rel][] = [
+							'type' => $class::getResourceSlug(),
+							'id' => $member->id,
+						];
+					}
+				}
+				$this->relationships_for_meta[$rel] = $class::getResourceSlug();
+			}
+		}
+
+		if ( $included && $flat !== true ){
+			$json['included'] = [];
+			foreach ($included as $rel => $members) {
+				$json['included'][$rel] = [];
+				foreach ($members as $idx => $member) {
+					$json['included'][$rel][] = $this->formatSingle($rel,$member->id,true);
+				}
+			}
+		}
+		return $json;
+	}//formatSingle()
+
+	protected function wrapJSON($data,$collection=false){
+		$resource_model_class = $this->resource_model_class;
+		$resource_slug = $resource_model_class::getResourceSlug();
+
+		if ( $collection===true ){
+			//Collection
+			$self = $this->router->pathFor('get_collection_api_' . $resource_slug);
+		}else{
+			//Single
+			if ( $data['id'] ){
+				$self = $this->router->pathFor('get_single_api_' . $resource_slug, [$resource_slug . '_id' => $data['id']]);
+			}else{
+				$self = $this->router->pathFor('create_single_' . $resource_slug);
+			}	
+		}
+		$meta = [
+			'related_collections' => [],
+		];
+		foreach ($this->relationships_for_meta as $rel => $resource_slug) {
+			$meta['related_collections'][$rel]['url'] = $this->router->pathFor('get_collection_api_' . $resource_slug);
+			$meta['related_collections'][$rel]['type'] = $resource_slug;
+		}
+		$this->relationships_for_meta = [];
 		return [
 			'data' => $data,
 			'links' => [
 				'self' => $self,
 			],
+			'meta' => $meta,
 		];
-	}//wrap_resource_for_get()
+	}//wrapJSON()
 
 	//CREATE METHODS
 
@@ -48,8 +126,8 @@ trait ResourceControllerInterfaceTrait
 	 		return $response;
 	 	}
 
- 		$vars['resource'] = $this->wrap_resource_for_get(
- 			$this->jsonapi_controller->getResource($this->resource_model_class)
+ 		$vars['resource'] = $this->wrapJSON(
+ 			$this->formatSingle($this->resource_model_class)
  		);
 
  		$template = 'resources/resource_form.php';
@@ -80,10 +158,13 @@ trait ResourceControllerInterfaceTrait
 		if ( $response->getStatusCode() != 200 ){
 			return $response; //TODO return json api error
 		}
+		$this->relationships_for_meta = [];
 		$resource_model_class = $this->resource_model_class;
 		$resource_slug = $resource_model_class::getResourceSlug();
 		return $response->withJsonAPI(
-			$this->wrap_resource_for_get($args[$resource_slug . '_jsonapi'])
+			$this->wrapJSON(
+				$this->formatSingle($this->resource_model_class,$args[$resource_slug])
+			)
 		);
 	}//getSingleApi()
 
@@ -107,30 +188,14 @@ trait ResourceControllerInterfaceTrait
 		}
 		$resource_model_class = $this->resource_model_class;
 		return $response->withJsonAPI(
-			$this->jsonapi_controller->formatCollection(
-				$resource_model_class, $resource_model_class::getActiveCollection()
+			$this->wrapJSON(
+				$this->formatCollection(
+					$resource_model_class, $resource_model_class::getActiveCollection()
+				),
+				true //collection flag
 			)
 		);
 	}//getCollectionApi()
-
-
-
-	// public function index($request, $response, $args){
-	// 	$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
-	// 	if ( $response->getStatusCode() != 200 ){
-	// 		return $response; //TEMP
-	// 	}
-
-	// 	$modelclass = __NAMESPACE__ . '\\' . ucfirst($this->resource_type);
-
-	// 	return $response->withJsonAPI(
-	// 		$this->jsonapi_controller->formatCollection(
-	// 			$this->resource_type, $modelclass::getActiveCollection()
-	// 		)
-	// 	);
-	// }//index()
-
-
 
 	//Access a web representation of a collection of resources, via GET
 	//e.g. /index/users returns Web Page with list of all Users
@@ -147,24 +212,36 @@ trait ResourceControllerInterfaceTrait
 
 	//Access an existing single resource editing web form, via GET
 	//e.g. /edit/user/2 returns Web Form for editing User with ID = 2
-	public function getEditSingleForm($request, $response, $args){
-		$response->write(__METHOD__ . '<br />');
-		foreach ($args as $key => $value) {
-			$response->write($key .' =<br />');
-			$response->write( print_r($value,true) );
-		}
+	public function getEditSingleForm($request, $response, $args, $vars=[]){
+		$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
+		if ( $response->getStatusCode() != 200 ){
+	 		return $response;
+	 	}
+	 	$this->relationships_for_meta = [];
+	 	$resource_model_class = $this->resource_model_class;
+		$resource_slug = $resource_model_class::getResourceSlug();
+	 	$vars['resource'] = $this->wrapJSON(
+ 			$this->formatSingle($this->resource_model_class,$args[$resource_slug])
+ 		);
 
+ 		$template = 'resources/resource_form.php';
+	 	return $this->renderer->render($response, $template, $vars);
 	}//getEditSingleForm()
 
 	//Submit updates to single resource, via POST
 	//e.g. /update/user recieves Web Form POST of edits for User with ID = 2
 	public function updateSingle($request, $response, $args){
-		$response->write(__METHOD__ . '<br />');
-		foreach ($args as $key => $value) {
-			$response->write($key .' =<br />');
-			$response->write( print_r($value,true) );
-		}
-
+		$response = $this->gateway($this->getNeededCap(__FUNCTION__), $response);
+		if ( $response->getStatusCode() != 200 ){
+	 		return $response;
+	 	}
+		//TODO check data type & id against resource > via middleware, serve 409 error on mismatch
+	 	$resource_model_class = $this->resource_model_class;
+	 	$resource_slug = $resource_model_class::getResourceSlug();
+ 		$resource = $args[$resource_slug];
+		$input = $request->getParsedBody()['data'];
+ 		$return = $this->validateAndSave($resource,$input);
+ 		return $response->withJsonAPI($return['to_json'],$return['code']);
 	}//updateSingle()
 
 	//DELETE METHODS
@@ -233,8 +310,8 @@ trait ResourceControllerInterfaceTrait
 				//Valid submission saved to database
 				$code = 200;
 				//As per http://jsonapi.org/format/#crud-updating, return entire resource b/c of e.g. last_modified 
-				$to_json = $this->wrap_resource_for_get(
-					$this->jsonapi_controller->getResource($this->resource_model_class,$resource->id)
+				$to_json = $this->wrapJSON(
+					$this->formatSingle($this->resource_model_class,$resource->id)
 				);
 			}
 		}else{

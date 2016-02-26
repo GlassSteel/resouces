@@ -1,6 +1,6 @@
 <?php
 namespace glasteel;
-
+//TODO weed out this class
 class JSONApiController
 {
 	// format resource collection
@@ -21,7 +21,7 @@ class JSONApiController
 		}
 		$id = $resource->id;
 		$slug = $resource_class::getResourceSlug();
-		$relationships = ($id) ? $resource->getResourceRelationships() : false;
+		$relationships = $resource->getResourceRelationships();
 		$included = ($id) ? $resource->getResourceIncluded() : false;
 		
 		$json = [
@@ -41,8 +41,9 @@ class JSONApiController
 			foreach ($relationships as $rel => $members) {
 				$json['relationships'][$rel] = [];
 				foreach ($members as $idx => $member) {
+					$class = get_class($member);
 					$json['relationships'][$rel][] = [
-						'type' => $rel,
+						'type' => $class::getResourceSlug(),
 						'id' => $member->id,
 					];
 				}

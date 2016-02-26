@@ -27,4 +27,10 @@
 		label:'Email',
 	} %}
 
+	{% include 'form_elements/relation.php' with {
+		label:'Roles',
+		element: 'checkbox',
+		relationship: 'roles',
+	} %}	
+
 {% endblock %}

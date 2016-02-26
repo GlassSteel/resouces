@@ -150,7 +150,7 @@ class ResourceRoutesBuilder
 		//Access a new single resource web form, via GET
 		//e.g. /new/user returns Web Form for new User info
 		$route_key = 'get_new_single_form';
-		$route = '/new/' . $url_single;
+		$route = '/' . $url_single . '/new';
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
@@ -159,7 +159,7 @@ class ResourceRoutesBuilder
 		//Submit a new single resource, via POST
 		//e.g. /create/user recieves Web Form POST of new User info
 		$route_key = 'create_single';
-		$route = '/create/' . $url_single;
+		$route = '/' . $url_single . '/new';
 		$app->post($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
@@ -170,10 +170,10 @@ class ResourceRoutesBuilder
 		//Access an API representation of a single resource instance, via GET
 		//e.g. /api/user/2 returns JSON representation of User with ID = 2
 		$route_key = 'get_single_api';
-		$route = '/api/' . $url_single . '/{' . $resource_slug . '_id}';
+		$route = '/' . $url_single . '/{' . $resource_slug . '_id}';
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
-			->add('IdParamsJSONAPI')	//TODO Make method of JSON API class?
+			//->add('IdParamsJSONAPI')	//TODO Make method of JSON API class? //TODO weed out this class
 			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
 			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
@@ -183,7 +183,7 @@ class ResourceRoutesBuilder
 		//Access a web representation of a single resource instance, via GET
 		//e.g. /view/user/2 returns Web Page with info on User with ID = 2
 		$route_key = 'get_single_view';
-		$route = '/view/' . $url_single . '/{' . $resource_slug . '_id}';
+		$route = '/' . $url_single . '/{' . $resource_slug . '_id}/view';
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
@@ -194,7 +194,7 @@ class ResourceRoutesBuilder
 		//Access an API representation of a collection of resources, via GET
 		//e.g. /api/users returns JSON representation of all Users
 		$route_key = 'get_collection_api';
-		$route = '/api/' . $url_plural;
+		$route = '/' . $url_plural;
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
@@ -203,7 +203,7 @@ class ResourceRoutesBuilder
 		//Access a web representation of a collection of resources, via GET
 		//e.g. /index/users returns Web Page with list of all Users
 		$route_key = 'get_collection_web';
-		$route = '/index/' . $url_plural;
+		$route = '/' . $url_plural . '/index';
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
 		;
@@ -214,18 +214,22 @@ class ResourceRoutesBuilder
 		//Access an existing single resource editing web form, via GET
 		//e.g. /edit/user/2 returns Web Form for editing User with ID = 2
 		$route_key = 'get_edit_single_form';
-		$route = '/edit/' . $url_single  . '/{' . $resource_slug . '_id}';
+		$route = '/' . $url_single . '/{' . $resource_slug . '_id}/edit';
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
+			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
+			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
 		self::$routes_registered[$resource_model_class][] = $route_key;
 
-		//Submit updates to single resource, via POST
-		//e.g. /update/user recieves Web Form POST of edits for User with ID = 2
+		//Submit updates to single resource, via PATCH
+		//e.g. /update/user recieves Web Form PATCH of edits for User with ID = 2
 		$route_key = 'update_single';
-		$route = '/update/' . $url_single  . '/{' . $resource_slug . '_id}';
-		$app->post($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
+		$route = '/' . $url_single . '/{' . $resource_slug . '_id}';
+		$app->patch($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
+			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
+			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
 		self::$routes_registered[$resource_model_class][] = $route_key;
 
@@ -234,18 +238,22 @@ class ResourceRoutesBuilder
 		//Access an existing single resource delete confirmation web form, via GET
 		//e.g. /confirm/user/2 returns Web Form for confirming deletion of User with ID = 2
 		$route_key = 'get_delete_single_form';
-		$route = '/confirm/' . $url_single  . '/{' . $resource_slug . '_id}';
+		$route = '/' . $url_single . '/{' . $resource_slug . '_id}/delete';
 		$app->get($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
+			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
+			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
 		self::$routes_registered[$resource_model_class][] = $route_key;
 
-		//Delete to single resource, via POST
-		//e.g. /delete/user recieves Web Form POST of User ID = 2 confirmed deletion
+		//Delete to single resource, via DELETE
+		//e.g. /delete/user recieves Web Form DELETE of User ID = 2 confirmed deletion
 		$route_key = 'delete_single';
-		$route = '/delete/' . $url_single  . '/{' . $resource_slug . '_id}';
-		$app->post($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
+		$route = '/' . $url_single . '/{' . $resource_slug . '_id}';
+		$app->delete($route, $controller_class . '_' . $resource_slug . ':' . $this->routeKeyToMethodName($route_key) )
 			->setName($route_key . '_' . $resource_slug)
+			->add('IdParamsExist')		//TODO Make method of Resource Model Class?
+			->add('IdParamsAreInt')		//TODO Make method of Resource Model Class?
 		;
 		self::$routes_registered[$resource_model_class][] = $route_key;
 
